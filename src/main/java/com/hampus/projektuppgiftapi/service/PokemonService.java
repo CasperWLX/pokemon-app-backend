@@ -2,7 +2,6 @@ package com.hampus.projektuppgiftapi.service;
 
 import com.hampus.projektuppgiftapi.exceptions.PokemonCreationException;
 import com.hampus.projektuppgiftapi.exceptions.PokemonNotFoundException;
-import com.hampus.projektuppgiftapi.exceptions.PokemonUpdateException;
 import com.hampus.projektuppgiftapi.model.pokemon.Pokemon;
 import com.hampus.projektuppgiftapi.model.pokemon.PokemonDTO;
 import com.hampus.projektuppgiftapi.repo.IPokemonRepository;
@@ -10,10 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PokemonService {
@@ -36,32 +33,21 @@ public class PokemonService {
         return getPokemonByName(name).flatMap(POKEMON_REPO::delete).then(Mono.just(true));
     }
 
-//    public Pokemon updatePokemon(String name, Pokemon newPokemonInformation){
-//        Pokemon existingPokemon = getPokemonByName(name);
-//        if (existingPokemon.getName().equals(newPokemonInformation.getName())){
-//            existingPokemon.setName(newPokemonInformation.getName())
-//                    .setHeight(newPokemonInformation.getHeight())
-//                    .setWeight(newPokemonInformation.getWeight())
-//                    .setFirstType(newPokemonInformation.getFirstType())
-//                    .setSecondType(newPokemonInformation.getSecondType())
-//                    .setImgURL(newPokemonInformation.getImgURL())
-//                    .setEvolutionStage(newPokemonInformation.getEvolutionStage());
-//            POKEMON_REPO.save(existingPokemon);
-//            LOGGER.info("Pokemon with name: {} updated in DB", newPokemonInformation.getName());
-//            return existingPokemon;
-//        }
-//        throw new PokemonUpdateException("Pokemon identifiers does not match");
-//    }
-
-    public Mono<Pokemon> saveOnePokemonToDB(PokemonDTO pokemonDTO){
+    public Mono<Pokemon> saveOnePokemonToDB(PokemonDTO pokemonDTO) {
         Pokemon pokemon = convertToPokemonModel(pokemonDTO);
 
-        return POKEMON_REPO.save(pokemon).doOnNext(savedPokemon ->
-                        LOGGER.info("Saved: {}", savedPokemon.getName()))
-                .thenReturn(pokemon);
+        LOGGER.info("Attempting to save Pokemon: {}", pokemon.getName());
+        return POKEMON_REPO.save(pokemon)
+                .doOnSuccess(savedPokemon -> LOGGER.info("Successfully saved Pokemon: {}", savedPokemon.getName()))
+                .doOnError(error -> LOGGER.error("Error occurred while saving Pokemon: {}", error.getMessage()))
+                .onErrorMap(error ->
+                        new PokemonCreationException(
+                                String.format("Could not save %s: %s",
+                                        pokemon.getName(), error.getMessage())));
     }
 
     public Pokemon convertToPokemonModel(PokemonDTO pokemonDTO){
+        LOGGER.info("Converting PokemonDTO to Pokemon: {}", pokemonDTO.getName());
         Pokemon pokemon = new Pokemon().setPokemonId(pokemonDTO.getId())
                 .setName(pokemonDTO.getName())
                 .setHeight(pokemonDTO.getHeight())
@@ -77,26 +63,20 @@ public class PokemonService {
         return pokemon;
     }
 
-//    public String deleteAllPokemon(){
-//        try {
-//            LOGGER.info("Deleting all pokemon");
-//            POKEMON_REPO.deleteAll();
-//            return "All pokemon deleted";
-//        }catch (RuntimeException e){
-//            throw new PokemonNotFoundException("Something went wrong when deleting all pokemon");
-//        }
-//    }
+    public Mono<Boolean> deleteAllPokemon(){
+        LOGGER.info("Deleting all Pokemon");
+        return POKEMON_REPO.deleteAll().then(Mono.just(true));
+    }
 
-//    public List<Pokemon> getAllPokemon(){
-//        try{
-//            LOGGER.info("Fetching all pokemon from database");
-//            return POKEMON_REPO.findAll();
-//        }catch (PokemonNotFoundException e){
-//            throw new PokemonNotFoundException("Something went wrong when fetching all pokemon");
-//        }
-//    }
+    public Flux<Pokemon> getAllPokemon(){
+        LOGGER.info("Fetching all Pokemon");
+        return POKEMON_REPO.findAll()
+                .doOnError(error -> LOGGER.error("Error fetching all games: {}", error.getMessage()))
+                .switchIfEmpty(Mono.error(new PokemonNotFoundException("Database is empty")));
+    }
 
     public Mono<Boolean> databaseIsPopulated(){
+        LOGGER.info("Checking if DB is populated");
         return POKEMON_REPO.count().map(count -> count == 0);
     }
 }

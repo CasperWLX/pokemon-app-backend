@@ -1,5 +1,6 @@
 package com.hampus.projektuppgiftapi.model.pokemon;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -7,14 +8,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Pokemon {
 
     @Id
+    @NotBlank
     private String id;
+    @NotBlank
     private Long pokemonId;
+    @NotBlank
     private String name;
+    @NotBlank
     private String firstType;
+
     private String secondType;
     private int evolutionStage;
+    @NotBlank
     private int height;
+    @NotBlank
     private int weight;
+    @NotBlank
     private String imgURL;
 
     public Pokemon() {}

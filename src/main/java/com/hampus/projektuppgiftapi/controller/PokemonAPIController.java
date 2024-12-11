@@ -1,7 +1,9 @@
 package com.hampus.projektuppgiftapi.controller;
 
-import com.hampus.projektuppgiftapi.exceptions.PokemonNotFoundException;
+import com.hampus.projektuppgiftapi.model.pokemon.Pokemon;
+import com.hampus.projektuppgiftapi.model.pokemon.PokemonDTO;
 import com.hampus.projektuppgiftapi.service.ApiService;
+import com.hampus.projektuppgiftapi.service.PokemonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,30 +16,24 @@ import reactor.core.publisher.Mono;
 @CrossOrigin(origins = {"http://localhost:5173", "https://pokemongame.hampuskallberg.se"})
 public class PokemonAPIController {
 
-    private final ApiService POKEMON_SERVICE;
-    private final Logger LOGGER = LoggerFactory.getLogger(PokemonAPIController.class);
+    private final ApiService API_SERVICE;
     @Autowired
-    public PokemonAPIController(ApiService POKEMON_SERVICE) {
-        this.POKEMON_SERVICE = POKEMON_SERVICE;
+    public PokemonAPIController(ApiService API_SERVICE) {
+        this.API_SERVICE = API_SERVICE;
     }
 
     @GetMapping("/fetch-and-save-pokemon")
     public Mono<ResponseEntity<Boolean>> fetchAndSavePokemon() {
-        return POKEMON_SERVICE.fetchAndSaveFirst151Pokemon().map(ResponseEntity::ok);
+        return API_SERVICE.fetchAndSaveFirst151Pokemon().map(ResponseEntity::ok);
     }
 
-//    @GetMapping("/fetch-one-pokemon/{identifier}")
-//    public void fetchOnePokemon(@PathVariable String identifier, @RequestParam int evolution_stage){
-//        try{
-//            try {
-//                int pokemonId = Integer.parseInt(identifier);
-//                POKEMON_SERVICE.fetchOnePokemonById(pokemonId, evolution_stage);
-//            } catch (NumberFormatException e){
-//                POKEMON_SERVICE.fetchOnePokemonByName(identifier, evolution_stage);
-//            }
-//        } catch(PokemonNotFoundException e){
-//            LOGGER.info("Error while fetching pokemon");
-//        }
-//
-//    }
+    @GetMapping("/fetch-one-pokemon/{id}")
+    public Mono<ResponseEntity<PokemonDTO>> fetchOnePokemon(@PathVariable int id, @RequestParam int evolutionStage) {
+        return API_SERVICE.fetchPokemon(id)
+                .map(pokemonDTO -> {
+                    pokemonDTO.setEvolutionStage(evolutionStage);
+                    return pokemonDTO;
+                })
+                .map(ResponseEntity::ok);
+    }
 }
