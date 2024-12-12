@@ -1,12 +1,15 @@
 package com.hampus.projektuppgiftapi.config;
 
 //import com.hampus.projektuppgiftapi.filter.JwtAuthenticationFilter;
+import com.hampus.projektuppgiftapi.filter.JwtAuthenticationFilter;
 import com.hampus.projektuppgiftapi.model.user.UserRoles;
 //import com.hampus.projektuppgiftapi.util.JwtUtil;
+import com.hampus.projektuppgiftapi.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.jaas.memory.InMemoryConfiguration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -23,12 +26,12 @@ import java.util.List;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-//    private final JwtUtil jwtUtil;
-//
-//    @Autowired
-//    public SecurityConfig(JwtUtil jwtUtil) {
-//        this.jwtUtil = jwtUtil;
-//    }
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    public SecurityConfig(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Bean
     public SecurityWebFilterChain securityFilterChainConfig(ServerHttpSecurity http) {
@@ -39,8 +42,8 @@ public class SecurityConfig {
                 )
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-                .csrf(ServerHttpSecurity.CsrfSpec::disable);
-        //.addFilterAt(new JwtAuthenticationFilter(jwtUtil), SecurityWebFiltersOrder.AUTHENTICATION);
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .addFilterAt(new JwtAuthenticationFilter(jwtUtil), SecurityWebFiltersOrder.AUTHENTICATION);
 
         return http.build();
     }

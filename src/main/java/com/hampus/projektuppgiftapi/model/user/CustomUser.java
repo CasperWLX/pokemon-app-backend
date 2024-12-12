@@ -17,7 +17,8 @@ public class CustomUser implements UserDetails {
     private String username;
     private String password;
     private UserRoles role;
-    private List<Integer> favoriteGameIds = new ArrayList<>();
+    private int numberOfAttempts;
+    private int bestAttempt;
 
     public CustomUser setName(String username){
         this.username = username;
@@ -34,17 +35,24 @@ public class CustomUser implements UserDetails {
         return this;
     }
 
-
-    public List<Integer> getFavoriteGameIds() {
-        return favoriteGameIds;
-    }
-
-    public void setFavoriteGameIds(List<Integer> favoriteGameIds) {
-        this.favoriteGameIds = favoriteGameIds;
-    }
-
     public UserRoles getRole(){
         return role;
+    }
+
+    public int getNumberOfAttempts() {
+        return numberOfAttempts;
+    }
+
+    public void setNumberOfAttempts(int numberOfAttempts) {
+        this.numberOfAttempts = numberOfAttempts;
+    }
+
+    public int getBestAttempt() {
+        return bestAttempt;
+    }
+
+    public void setBestAttempt(int bestAttempt) {
+        this.bestAttempt = bestAttempt;
     }
 
     @Override

@@ -28,27 +28,27 @@ public class DatabaseController {
         this.DATABASE_SERVICE = databaseService;
     }
 
-    @GetMapping("/fetch-one-pokemon/{name}")
+    @GetMapping("/pokemon/{name}")
     public Mono<ResponseEntity<Pokemon>> getPokemonFromDatabase(@PathVariable String name) {
         return DATABASE_SERVICE.getPokemonByName(name).map(ResponseEntity::ok);
     }
 
-    @GetMapping("/fetch-all-pokemon")
+    @GetMapping("/pokemon/all")
     public Mono<ResponseEntity<List<Pokemon>>> getAllPokemonFromDatabase(){
         return DATABASE_SERVICE.getAllPokemon().collectList().map(ResponseEntity::ok);
     }
 
-    @PostMapping("/add-one-pokemon")
+    @PostMapping("/pokemon/add")
     public Mono<ResponseEntity<Pokemon>> addOnePokemonToDatabase(@RequestBody PokemonDTO pokemonDTO){
         return DATABASE_SERVICE.saveOnePokemonToDB(pokemonDTO).map(ResponseEntity::ok);
     }
 
-    @DeleteMapping("/delete-one-pokemon/{name}")
+    @DeleteMapping("/pokemon/{name}")
     public Mono<ResponseEntity<Boolean>> deleteOnePokemonFromDatabase(@PathVariable String name) {
         return DATABASE_SERVICE.deletePokemonByName(name).thenReturn(ResponseEntity.noContent().build());
     }
 
-    @DeleteMapping("/delete-all-pokemon")
+    @DeleteMapping("/pokemon/all")
     public Mono<ResponseEntity<Boolean>> deleteAllPokemonFromDatabase(){
         return DATABASE_SERVICE.deleteAllPokemon().thenReturn(ResponseEntity.noContent().build());
     }

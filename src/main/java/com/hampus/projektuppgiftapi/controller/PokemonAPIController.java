@@ -22,12 +22,12 @@ public class PokemonAPIController {
         this.API_SERVICE = API_SERVICE;
     }
 
-    @GetMapping("/fetch-and-save-pokemon")
+    @GetMapping("/populate-database")
     public Mono<ResponseEntity<Boolean>> fetchAndSavePokemon() {
         return API_SERVICE.fetchAndSaveFirst151Pokemon().map(ResponseEntity::ok);
     }
 
-    @GetMapping("/fetch-one-pokemon/{id}")
+    @GetMapping("/pokemon/{id}")
     public Mono<ResponseEntity<PokemonDTO>> fetchOnePokemon(@PathVariable int id, @RequestParam int evolutionStage) {
         return API_SERVICE.fetchPokemon(id)
                 .map(pokemonDTO -> {
