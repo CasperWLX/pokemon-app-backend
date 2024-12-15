@@ -23,8 +23,19 @@ public class PokemonService {
         this.POKEMON_REPO = pokemonRepository;
     }
 
+    public Mono<Pokemon> getPokemonByIdentifier(String identifier){
+        LOGGER.info("Fetching pokemon from DB with identifier: {}", identifier );
+        if (isInteger(identifier)) {
+            return getPokemonById(Integer.parseInt(identifier));
+        }
+        return getPokemonByName(identifier);
+    }
+
+    public Mono<Pokemon> getPokemonById(int id){
+        return POKEMON_REPO.findByPokemonId(id).switchIfEmpty(Mono.error(new PokemonNotFoundException(String.valueOf(id))));
+    }
+
     public Mono<Pokemon> getPokemonByName(String name){
-        LOGGER.info("Fetching pokemon from DB with name: {}", name);
         return POKEMON_REPO.findByName(name).switchIfEmpty(Mono.error(new PokemonNotFoundException(name)));
     }
 
@@ -78,5 +89,14 @@ public class PokemonService {
     public Mono<Boolean> databaseIsPopulated(){
         LOGGER.info("Checking if DB is populated");
         return POKEMON_REPO.count().map(count -> count == 0);
+    }
+
+    public boolean isInteger(String input){
+        try{
+            Integer.parseInt(input);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
     }
 }

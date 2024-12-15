@@ -18,7 +18,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/database/v2")
-@CrossOrigin(origins = {"http://pokegame.hampuskallberg.se", "http://localhost:5173", "https://pokemongame.hampuskallberg.se"})
 public class DatabaseController {
 
     private final PokemonService DATABASE_SERVICE;
@@ -28,9 +27,9 @@ public class DatabaseController {
         this.DATABASE_SERVICE = databaseService;
     }
 
-    @GetMapping("/pokemon/{name}")
-    public Mono<ResponseEntity<Pokemon>> getPokemonFromDatabase(@PathVariable String name) {
-        return DATABASE_SERVICE.getPokemonByName(name).map(ResponseEntity::ok);
+    @GetMapping("/pokemon/{identifier}")
+    public Mono<ResponseEntity<Pokemon>> getPokemonFromDatabase(@PathVariable String identifier) {
+        return DATABASE_SERVICE.getPokemonByIdentifier(identifier).map(ResponseEntity::ok);
     }
 
     @GetMapping("/pokemon/all")

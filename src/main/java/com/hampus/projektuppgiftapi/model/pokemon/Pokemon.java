@@ -11,7 +11,7 @@ public class Pokemon {
     @NotBlank
     private String id;
     @NotBlank
-    private Long pokemonId;
+    private int pokemonId;
     @NotBlank
     private String name;
     @NotBlank
@@ -28,12 +28,12 @@ public class Pokemon {
 
     public Pokemon() {}
 
-    public Long getPokemonId() {
+    public int getPokemonId() {
         return pokemonId;
     }
 
     public Pokemon setPokemonId(int pokemonId){
-        this.pokemonId = (long) pokemonId;
+        this.pokemonId = pokemonId;
         return this;
     }
 

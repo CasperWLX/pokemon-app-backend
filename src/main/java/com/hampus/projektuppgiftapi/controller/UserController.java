@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/user/v1")
-@CrossOrigin(origins = {"http://localhost:5173", "https://gamestation.hampuskallberg.se"})
 public class UserController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);

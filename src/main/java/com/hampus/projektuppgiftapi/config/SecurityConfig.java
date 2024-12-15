@@ -1,9 +1,7 @@
 package com.hampus.projektuppgiftapi.config;
 
-//import com.hampus.projektuppgiftapi.filter.JwtAuthenticationFilter;
 import com.hampus.projektuppgiftapi.filter.JwtAuthenticationFilter;
 import com.hampus.projektuppgiftapi.model.user.UserRoles;
-//import com.hampus.projektuppgiftapi.util.JwtUtil;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:8081", "http://192.168.8.152:8081", "https://pokemongame.hampuskallberg.se"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cookie"));
         corsConfiguration.setExposedHeaders(List.of("Authorization"));
