@@ -35,7 +35,14 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityFilterChainConfig(ServerHttpSecurity http) {
         http.cors(Customizer.withDefaults())
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/**").permitAll()
+                        .pathMatchers("/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/database/v2/pokemon/*").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/user/v1/register", "/user/v1/login").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/database/v2/pokemon/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.DELETE, "/database/v2/pokemon/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.GET,"/user/v1/info").hasAuthority(USER_CAN_READ.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.PUT, "/user/v1/update").hasAnyAuthority(USER_CAN_WRITE.getPERMISSIONS(), ADMIN_CAN_WRITE.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.DELETE, "/user/v1/delete/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
                         .anyExchange().authenticated()
                 )
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)

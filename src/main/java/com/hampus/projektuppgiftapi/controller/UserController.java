@@ -4,6 +4,8 @@ import com.hampus.projektuppgiftapi.model.user.AuthRequestDTO;
 import com.hampus.projektuppgiftapi.model.user.CustomUser;
 import com.hampus.projektuppgiftapi.service.UserService;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/user/v1")
+@Tag(name = "User Database", description = "Endpoints for User and Database interaction")
 public class UserController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -30,6 +33,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register new User", description = "Post a new User to the Database")
     public Mono<ResponseEntity<Void>> createNewUser(@RequestBody AuthRequestDTO authRequest) {
         LOGGER.info("Creating new user with name: {}", authRequest.getUsername());
         return USER_SERVICE.saveUserToDB(authRequest)
@@ -37,11 +41,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Log in User", description = "Post a Login request to backend")
     public Mono<ResponseEntity<Void>> login(@RequestBody AuthRequestDTO authRequest) {
         LOGGER.info("Trying to log in user: {}", authRequest.getUsername());
 
         return USER_SERVICE.authenticate(authRequest.getUsername(), authRequest.getPassword())
-                .flatMap(authentication -> USER_SERVICE.getUser(authRequest.getUsername())
+                .flatMap(_ -> USER_SERVICE.getUser(authRequest.getUsername())
                         .flatMap(user -> {
                             String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
@@ -64,12 +69,14 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{username}")
+    @Operation(summary = "Delete a User", description = "Deletes a User by username")
     public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String username) {
         LOGGER.info("Trying to delete user");
         return USER_SERVICE.deleteUser(username).then(Mono.just(ResponseEntity.status(HttpStatus.NO_CONTENT).build()));
     }
 
     @GetMapping("/info")
+    @Operation(summary = "Get User info", description = "Fetches all info about a User")
     public Mono<ResponseEntity<CustomUser>> getUserInfo(@AuthenticationPrincipal String username) {
         LOGGER.info("Trying to retrieve user info");
         return USER_SERVICE.getUser(username).map(ResponseEntity::ok);
