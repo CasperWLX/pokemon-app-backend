@@ -3,7 +3,7 @@ package com.hampus.projektuppgiftapi.model.user;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class AuthRequestDTO {
+public class AuthRequest {
 
     @NotBlank
     @Size(min = 4, max = 20)

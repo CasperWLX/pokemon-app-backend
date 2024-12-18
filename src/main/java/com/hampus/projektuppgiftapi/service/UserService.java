@@ -2,7 +2,7 @@ package com.hampus.projektuppgiftapi.service;
 
 import com.hampus.projektuppgiftapi.exceptions.UserAlreadyExistsException;
 import com.hampus.projektuppgiftapi.exceptions.UserNotFoundException;
-import com.hampus.projektuppgiftapi.model.user.AuthRequestDTO;
+import com.hampus.projektuppgiftapi.model.user.AuthRequest;
 import com.hampus.projektuppgiftapi.model.user.CustomUser;
 import com.hampus.projektuppgiftapi.model.user.UserRoles;
 import com.hampus.projektuppgiftapi.repo.IUserRepository;
@@ -27,12 +27,14 @@ public class UserService {
     }
 
     public Mono<CustomUser> getUser(String username) {
+        LOGGER.info("Trying to retrieve info about: {}", username);
         return USER_DATABASE.findByUsername(username)
                 .switchIfEmpty(Mono.error(new UserNotFoundException(username)))
                 .doOnSuccess(info -> LOGGER.info("Fetched {} info from database", username));
     }
 
-    public Mono<Void> saveUserToDB(AuthRequestDTO authRequest) {
+    public Mono<Void> saveUserToDB(AuthRequest authRequest) {
+        LOGGER.info("Creating new user with name: {}", authRequest.getUsername());
         return USER_DATABASE.existsByUsernameIgnoreCase(authRequest.getUsername()).flatMap(exists -> {
             if (exists){
                 LOGGER.error("A user with the name: {} already exists", authRequest.getUsername());
@@ -45,7 +47,7 @@ public class UserService {
         });
     }
 
-    public Mono<CustomUser> convertUserToDBUser(AuthRequestDTO authRequest) {
+    public Mono<CustomUser> convertUserToDBUser(AuthRequest authRequest) {
         CustomUser customUser = new CustomUser()
                 .setName(authRequest.getUsername())
                 .setPassword(PASSWORD_ENCODER.encode(authRequest.getPassword()))
@@ -54,11 +56,13 @@ public class UserService {
     }
 
     public Mono<Authentication> authenticate(String username, String password) {
+        LOGGER.info("Trying to log in user: {}", username);
         return getUser(username).filter(user -> PASSWORD_ENCODER.matches(password, user.getPassword()))
                 .map(user -> new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()));
     }
 
     public Mono<Void> deleteUser(String username) {
+        LOGGER.info("Trying to delete user: {}", username);
         return getUser(username).flatMap(USER_DATABASE::delete).doOnSuccess(logg -> LOGGER.info("Deleted user {}", username));
     }
 }

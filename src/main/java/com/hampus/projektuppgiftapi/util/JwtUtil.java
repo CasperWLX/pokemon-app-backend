@@ -14,6 +14,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    private static final long REFRESH_TOKEN_EXPIRATION = 604800000; //7 days
     private final SecretKey KEY;
 
     public JwtUtil(@Value("${jwt.key}") String secretKey) {
@@ -30,6 +31,16 @@ public class JwtUtil {
                 .claim("roles", roles.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(KEY, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username, UserRoles roles) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("roles", roles.name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(KEY, SignatureAlgorithm.HS256)
                 .compact();
     }

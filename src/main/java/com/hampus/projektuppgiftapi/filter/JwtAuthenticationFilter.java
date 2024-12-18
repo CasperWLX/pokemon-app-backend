@@ -2,7 +2,6 @@ package com.hampus.projektuppgiftapi.filter;
 
 import com.hampus.projektuppgiftapi.model.user.UserRoles;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
-import org.springframework.http.HttpCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -11,8 +10,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-import java.util.Optional;
-
 
 public class JwtAuthenticationFilter implements WebFilter {
 
@@ -24,31 +21,30 @@ public class JwtAuthenticationFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
-        if(path.equals("/user/v1/login") || path.equals("/user/v1/register")){
+
+        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return chain.filter(exchange);
         }
 
-        Optional<String> jwtOpt = Optional.ofNullable(exchange.getRequest().getCookies().getFirst("jwtToken"))
-                .map(HttpCookie::getValue);
+        String jwt = authHeader.substring(7); // Remove "Bearer " prefix
 
-        if (jwtOpt.isEmpty()) {
-            return chain.filter(exchange);
-        }
-
-        String jwt = jwtOpt.get();
+        // Validate JWT
         if (jwtUtil.validateToken(jwt)) {
             String username = jwtUtil.getUsername(jwt);
             UserRoles roles = jwtUtil.extractRoles(jwt);
 
-
+            // Create authentication token
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(username, null, roles.getGrantedAuthorities());
 
+            // Create and set security context
             SecurityContext securityContext = new SecurityContextImpl(authentication);
 
-            return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+            return chain.filter(exchange)
+                    .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
         }
-        return chain.filter(exchange);
+
+        return chain.filter(exchange); // Proceed without authentication if validation fails
     }
 }

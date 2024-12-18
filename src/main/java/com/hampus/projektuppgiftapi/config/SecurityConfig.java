@@ -1,13 +1,11 @@
 package com.hampus.projektuppgiftapi.config;
 
 import com.hampus.projektuppgiftapi.filter.JwtAuthenticationFilter;
-import com.hampus.projektuppgiftapi.model.user.UserRoles;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.jaas.memory.InMemoryConfiguration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -37,19 +35,18 @@ public class SecurityConfig {
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/database/v2/pokemon/*").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/user/v1/register", "/user/v1/login").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/user/v2/register", "/user/v2/login", "/user/v2/refresh-token").permitAll()
                         .pathMatchers(HttpMethod.POST, "/database/v2/pokemon/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
                         .pathMatchers(HttpMethod.DELETE, "/database/v2/pokemon/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
-                        .pathMatchers(HttpMethod.GET,"/user/v1/info").hasAuthority(USER_CAN_READ.getPERMISSIONS())
-                        .pathMatchers(HttpMethod.PUT, "/user/v1/update").hasAnyAuthority(USER_CAN_WRITE.getPERMISSIONS(), ADMIN_CAN_WRITE.getPERMISSIONS())
-                        .pathMatchers(HttpMethod.DELETE, "/user/v1/delete/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.GET,"/user/v2/info").hasAuthority(USER_CAN_READ.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.PUT, "/user/v2/update").hasAnyAuthority(USER_CAN_WRITE.getPERMISSIONS(), ADMIN_CAN_WRITE.getPERMISSIONS())
+                        .pathMatchers(HttpMethod.DELETE, "/user/v2/delete/*").hasAuthority(ADMIN_CAN_WRITE.getPERMISSIONS())
                         .anyExchange().authenticated()
                 )
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .addFilterAt(new JwtAuthenticationFilter(jwtUtil), SecurityWebFiltersOrder.AUTHENTICATION);
-
         return http.build();
     }
 
@@ -58,7 +55,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:8081", "http://192.168.8.152:8081", "https://pokemongame.hampuskallberg.se"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cookie"));
+        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         corsConfiguration.setExposedHeaders(List.of("Authorization"));
         corsConfiguration.setAllowCredentials(true);
 
