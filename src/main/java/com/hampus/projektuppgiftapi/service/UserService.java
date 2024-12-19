@@ -30,7 +30,7 @@ public class UserService {
         LOGGER.info("Trying to retrieve info about: {}", username);
         return USER_DATABASE.findByUsername(username)
                 .switchIfEmpty(Mono.error(new UserNotFoundException(username)))
-                .doOnSuccess(info -> LOGGER.info("Fetched {} info from database", username));
+                .doOnSuccess(_ -> LOGGER.info("Fetched {} info from database", username));
     }
 
     public Mono<Void> saveUserToDB(AuthRequest authRequest) {
@@ -63,6 +63,14 @@ public class UserService {
 
     public Mono<Void> deleteUser(String username) {
         LOGGER.info("Trying to delete user: {}", username);
-        return getUser(username).flatMap(USER_DATABASE::delete).doOnSuccess(logg -> LOGGER.info("Deleted user {}", username));
+        return getUser(username).flatMap(USER_DATABASE::delete).doOnSuccess(_ -> LOGGER.info("Deleted user {}", username));
+    }
+
+    public Mono<CustomUser> updateUser(String username, int noOfAttempts) {
+        return getUser(username).flatMap(user -> {
+            user.setBestAttempt(noOfAttempts);
+            user.setNumberOfAttempts(noOfAttempts);
+            return USER_DATABASE.save(user);
+        });
     }
 }

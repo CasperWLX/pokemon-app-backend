@@ -4,6 +4,7 @@ import com.hampus.projektuppgiftapi.model.token.RefreshTokenRequest;
 import com.hampus.projektuppgiftapi.model.token.TokenResponse;
 import com.hampus.projektuppgiftapi.model.user.AuthRequest;
 import com.hampus.projektuppgiftapi.model.user.CustomUser;
+import com.hampus.projektuppgiftapi.model.user.UpdateAttemptsRequest;
 import com.hampus.projektuppgiftapi.model.user.UserRoles;
 import com.hampus.projektuppgiftapi.service.UserService;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
@@ -85,6 +86,12 @@ public class UserController {
         String newRefreshToken = jwtUtil.generateRefreshToken(jwtUtil.getUsername(refreshToken), jwtUtil.extractRoles(refreshToken));
         LOGGER.info("Issued new jwt and refresh token for user: {}", jwtUtil.getUsername(refreshToken));
         return Mono.just(ResponseEntity.ok(new TokenResponse(newJwtToken, newRefreshToken)));
+    }
+
+    @PutMapping("/update")
+    @Operation(summary = "Updates the user", description = "Updates a user with new information")
+    public Mono<ResponseEntity<CustomUser>> updateUser(@AuthenticationPrincipal String username, @RequestBody UpdateAttemptsRequest updateAttemptsRequest) {
+        return USER_SERVICE.updateUser(username, updateAttemptsRequest.getNoOfAttempts()).map(ResponseEntity::ok);
     }
 
 

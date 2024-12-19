@@ -44,15 +44,17 @@ public class CustomUser implements UserDetails {
     }
 
     public void setNumberOfAttempts(int numberOfAttempts) {
-        this.numberOfAttempts = numberOfAttempts;
+        this.numberOfAttempts += numberOfAttempts;
     }
 
     public int getBestAttempt() {
         return bestAttempt;
     }
 
-    public void setBestAttempt(int bestAttempt) {
-        this.bestAttempt = bestAttempt;
+    public void setBestAttempt(int attempt) {
+        if (attempt < bestAttempt || bestAttempt == 0){
+            bestAttempt = attempt;
+        }
     }
 
     @Override
