@@ -1,5 +1,6 @@
 package com.hampus.projektuppgiftapi.service;
 
+import com.hampus.projektuppgiftapi.exceptions.LogInException;
 import com.hampus.projektuppgiftapi.exceptions.UserAlreadyExistsException;
 import com.hampus.projektuppgiftapi.exceptions.UserNotFoundException;
 import com.hampus.projektuppgiftapi.model.user.AuthRequest;
@@ -9,10 +10,11 @@ import com.hampus.projektuppgiftapi.repo.IUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -27,10 +29,9 @@ public class UserService {
     }
 
     public Mono<CustomUser> getUser(String username) {
-        LOGGER.info("Trying to retrieve info about: {}", username);
+        LOGGER.info("Fetching user: {} from database", username);
         return USER_DATABASE.findByUsername(username)
-                .switchIfEmpty(Mono.error(new UserNotFoundException(username)))
-                .doOnSuccess(_ -> LOGGER.info("Fetched {} info from database", username));
+                .switchIfEmpty(Mono.error(new UserNotFoundException(username)));
     }
 
     public Mono<Void> saveUserToDB(AuthRequest authRequest) {
@@ -55,21 +56,34 @@ public class UserService {
         return Mono.just(customUser);
     }
 
-    public Mono<Authentication> authenticate(String username, String password) {
-        LOGGER.info("Trying to log in user: {}", username);
-        return getUser(username).filter(user -> PASSWORD_ENCODER.matches(password, user.getPassword()))
-                .map(user -> new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()));
+    public Mono<UsernamePasswordAuthenticationToken> authenticate(String username, String password) {
+        LOGGER.info("Authenticating: {}", username);
+
+        return getUser(username)
+                .flatMap(user -> {
+                    if (PASSWORD_ENCODER.matches(password, user.getPassword())) {
+                        return Mono.just(new UsernamePasswordAuthenticationToken(
+                                user.getUsername(), user.getPassword(), user.getAuthorities()));
+                    } else {
+                        return Mono.error(new LogInException(username));
+                    }
+                });
     }
+
 
     public Mono<Void> deleteUser(String username) {
         LOGGER.info("Trying to delete user: {}", username);
         return getUser(username).flatMap(USER_DATABASE::delete).doOnSuccess(_ -> LOGGER.info("Deleted user {}", username));
     }
 
-    public Mono<CustomUser> updateUser(String username, int noOfAttempts) {
+    public Mono<CustomUser> updateUser(String username, List<String> guessedPokemon) {
+        LOGGER.info("Trying to update user: {}", username);
         return getUser(username).flatMap(user -> {
-            user.setBestAttempt(noOfAttempts);
-            user.setNumberOfAttempts(noOfAttempts);
+            user.setBestAttempt(guessedPokemon.size());
+            user.setNumberOfAttempts(guessedPokemon.size());
+            for (String pokemon : guessedPokemon) {
+                user.addGuess(pokemon);
+            }
             return USER_DATABASE.save(user);
         });
     }

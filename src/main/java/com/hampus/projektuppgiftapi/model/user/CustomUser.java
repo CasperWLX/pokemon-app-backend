@@ -5,9 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Document(collection = "Users")
 public class CustomUser implements UserDetails {
@@ -19,6 +17,7 @@ public class CustomUser implements UserDetails {
     private UserRoles role;
     private int numberOfAttempts;
     private int bestAttempt;
+    private Map<String, Integer> guessedPokemon;
 
     public CustomUser setName(String username){
         this.username = username;
@@ -55,6 +54,17 @@ public class CustomUser implements UserDetails {
         if (attempt < bestAttempt || bestAttempt == 0){
             bestAttempt = attempt;
         }
+    }
+
+    public void addGuess(String pokemon) {
+        if (guessedPokemon == null) {
+            guessedPokemon = new HashMap<>();
+        }
+        guessedPokemon.put(pokemon, guessedPokemon.getOrDefault(pokemon, 0) + 1);
+    }
+
+    public Map<String, Integer> getGuessedPokemon(){
+        return guessedPokemon;
     }
 
     @Override

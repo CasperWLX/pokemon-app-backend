@@ -4,8 +4,7 @@ import com.hampus.projektuppgiftapi.model.token.RefreshTokenRequest;
 import com.hampus.projektuppgiftapi.model.token.TokenResponse;
 import com.hampus.projektuppgiftapi.model.user.AuthRequest;
 import com.hampus.projektuppgiftapi.model.user.CustomUser;
-import com.hampus.projektuppgiftapi.model.user.UpdateAttemptsRequest;
-import com.hampus.projektuppgiftapi.model.user.UserRoles;
+import com.hampus.projektuppgiftapi.model.user.UpdateRequest;
 import com.hampus.projektuppgiftapi.service.UserService;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,9 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 @RestController
@@ -55,9 +51,7 @@ public class UserController {
 
                                     return Mono.just(ResponseEntity.ok(new TokenResponse(accessToken, refreshToken)));
                                 })
-                )
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build())
-                .onErrorResume(_ -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
+                );
     }
 
 
@@ -90,8 +84,8 @@ public class UserController {
 
     @PutMapping("/update")
     @Operation(summary = "Updates the user", description = "Updates a user with new information")
-    public Mono<ResponseEntity<CustomUser>> updateUser(@AuthenticationPrincipal String username, @RequestBody UpdateAttemptsRequest updateAttemptsRequest) {
-        return USER_SERVICE.updateUser(username, updateAttemptsRequest.getNoOfAttempts()).map(ResponseEntity::ok);
+    public Mono<ResponseEntity<CustomUser>> updateUser(@AuthenticationPrincipal String username, @RequestBody UpdateRequest updateRequest) {
+        return USER_SERVICE.updateUser(username, updateRequest.getGuessedPokemon()).map(ResponseEntity::ok);
     }
 
 

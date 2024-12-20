@@ -60,16 +60,16 @@ public class PokemonService {
     public Pokemon convertToPokemonModel(PokemonDTO pokemonDTO){
         LOGGER.info("Converting PokemonDTO to Pokemon: {}", pokemonDTO.getName());
         Pokemon pokemon = new Pokemon().setPokemonId(pokemonDTO.getId())
-                .setName(pokemonDTO.getName())
+                .setName(capitalizeFirstLetter(pokemonDTO.getName()))
                 .setHeight(pokemonDTO.getHeight())
                 .setWeight(pokemonDTO.getWeight())
                 .setEvolutionStage(pokemonDTO.getEvolutionStage())
-                .setFirstType(pokemonDTO.getTypes().getFirst().getType().getName())
+                .setFirstType(capitalizeFirstLetter(pokemonDTO.getTypes().getFirst().getType().getName()))
                 .setImgURL(pokemonDTO.getSprites().getFront_default());
         if (pokemonDTO.getTypes().size() > 1){
-            pokemon.setSecondType(pokemonDTO.getTypes().getLast().getType().getName());
+            pokemon.setSecondType(capitalizeFirstLetter(pokemonDTO.getTypes().getLast().getType().getName()));
         }else{
-            pokemon.setSecondType("none");
+            pokemon.setSecondType("None");
         }
         return pokemon;
     }
@@ -89,6 +89,13 @@ public class PokemonService {
     public Mono<Boolean> databaseIsPopulated(){
         LOGGER.info("Checking if DB is populated");
         return POKEMON_REPO.count().map(count -> count == 0);
+    }
+
+    private String capitalizeFirstLetter(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 
     public boolean isInteger(String input){

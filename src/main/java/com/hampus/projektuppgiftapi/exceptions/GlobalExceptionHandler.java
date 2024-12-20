@@ -47,4 +47,11 @@ public class GlobalExceptionHandler {
         logger.error("User already exists: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+
+    @ExceptionHandler(LogInException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<String> handleInvalidLogin(LogInException e) {
+        logger.error("Invalid credentials for user: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
 }
