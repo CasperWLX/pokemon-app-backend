@@ -38,5 +38,5 @@ tasks.named('test') {
 }
 
 bootJar {
-	mainClass = 'com.hampus.projekt-uppgift-api.ProjektUppgiftApiApplication'
+	mainClass = 'com.hampus.projekt-uppgift-api.PokemonBackendApplication'
 }
