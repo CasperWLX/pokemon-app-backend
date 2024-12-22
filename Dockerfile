@@ -1,8 +1,8 @@
 FROM openjdk:22
 # Set the working directory in the container
 WORKDIR /app
-# Copy the JAR file into the container named /app and renames it to 'pokemon-api'
-COPY build/libs/pokemon-backend-0.0.1-SNAPSHOT.jar app.jar
+# Copy the JAR file into the container named /app and renames it to 'app.jar'
+COPY build/libs/projekt-uppgift-api-0.0.1-SNAPSHOT.jar app.jar
 # Expose the port that the application will run on (Must reflect Spring Boot's PORT)
 EXPOSE 10000
 
