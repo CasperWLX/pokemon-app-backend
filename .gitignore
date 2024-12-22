@@ -1,6 +1,5 @@
 HELP.md
 
-/src/main/resources/application.properties
 /src/main/resources/keystore.p12
 docker-compose.yaml
 
