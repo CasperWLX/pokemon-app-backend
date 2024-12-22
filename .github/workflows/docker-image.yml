@@ -69,4 +69,4 @@ jobs:
       # Trigger Render deploy hook
       - name: Trigger Render Deploy Hook
         run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_POKEMON }}
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
