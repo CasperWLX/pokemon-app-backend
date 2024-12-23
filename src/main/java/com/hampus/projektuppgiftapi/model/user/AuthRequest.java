@@ -6,11 +6,11 @@ import jakarta.validation.constraints.Size;
 public class AuthRequest {
 
     @NotBlank
-    @Size(min = 4, max = 20)
+    @Size(min = 5, max = 20, message = "Username must be between 5 and 20 characters")
     private String username;
 
     @NotBlank
-    @Size(min = 4)
+    @Size(min = 5, message = "Password must be at least 5 characters")
     private String password;
 
     public String getUsername() {

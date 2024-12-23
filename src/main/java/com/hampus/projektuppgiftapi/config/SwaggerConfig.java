@@ -13,14 +13,14 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
+                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 .components(new Components()
-                        .addSecuritySchemes("cookieAuth",
+                        .addSecuritySchemes("BearerAuth",
                                 new SecurityScheme()
-                                        .name("JWT-COOKIE")
-                                        .type(SecurityScheme.Type.APIKEY)
-                                        .in(SecurityScheme.In.COOKIE)
-                                        .description("JWT token stored in a cookie named 'JWT-COOKIE'")));
+                                        .name("Authorization")
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .bearerFormat("JWT")
+                                        .description("JWT token passed in the Authorization header as 'BearerAuth'")));
     }
 }
 

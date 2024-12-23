@@ -86,7 +86,7 @@ public class PokemonService {
                 .switchIfEmpty(Mono.error(new PokemonNotFoundException("Database is empty")));
     }
 
-    public Mono<Boolean> databaseIsPopulated(){
+    public Mono<Boolean> isDatabaseEmpty(){
         LOGGER.info("Checking if DB is populated");
         return POKEMON_REPO.count().map(count -> count == 0);
     }

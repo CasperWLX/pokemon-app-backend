@@ -12,94 +12,105 @@ public class PokemonDTO {
     private List<Types> types;
     private int evolutionStage = 1;
 
+
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public PokemonDTO setId(int id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public PokemonDTO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public int getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public PokemonDTO setHeight(int height) {
         this.height = height;
+        return this;
     }
 
     public int getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public PokemonDTO setWeight(int weight) {
         this.weight = weight;
+        return this;
     }
 
     public int getEvolutionStage() {
         return evolutionStage;
     }
 
-    public void setEvolutionStage(int evolutionStage) {
+    public PokemonDTO setEvolutionStage(int evolutionStage) {
         this.evolutionStage = evolutionStage;
+        return this;
     }
 
     public Sprites getSprites() {
         return sprites;
     }
 
-    public void setSprites(Sprites sprites) {
+    public PokemonDTO setSprites(Sprites sprites) {
         this.sprites = sprites;
+        return this;
     }
 
     public List<Types> getTypes() {
         return types;
     }
 
-    public void setTypesList(List<Types> types) {
+    public PokemonDTO setTypesList(List<Types> types) {
         this.types = types;
+        return this;
     }
 
-    public static class Sprites{
+    public static class Sprites {
         private String front_default;
 
         public String getFront_default() {
             return front_default;
         }
 
-        public void setFront_default(String front_default) {
+        public Sprites setFront_default(String front_default) {
             this.front_default = front_default;
+            return this;
         }
     }
 
-    public static class Types{
+    public static class Types {
         private Type type;
 
         public Type getType() {
             return type;
         }
 
-        public void setType(Type type) {
+        public Types setType(Type type) {
             this.type = type;
+            return this;
         }
 
-        public static class Type{
+        public static class Type {
             private String name;
 
             public String getName() {
                 return name;
             }
 
-            public void setName(String name) {
+            public Type setName(String name) {
                 this.name = name;
+                return this;
             }
         }
     }

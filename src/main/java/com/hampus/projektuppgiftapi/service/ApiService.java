@@ -37,10 +37,10 @@ public class ApiService {
 
     public Mono<Boolean> fetchAndSaveFirst151Pokemon() {
         LOGGER.info("Fetching and saving first gen");
-        return POKEMON_SERVICE.databaseIsPopulated().flatMap(isPopulated -> {
-            if (isPopulated) {
+        return POKEMON_SERVICE.isDatabaseEmpty().flatMap(isEmpty -> {
+            if (isEmpty) {
                 return populateDBWithPokemon()
-                        .onErrorResume(error -> Mono.error(new PokemonCreationException("Could not save pokemon")))
+                        .onErrorResume(_ -> Mono.error(new PokemonCreationException("Could not save pokemon")))
                         .then(Mono.just(true));
             }
             return Mono.error(new PokemonUpdateException("Database is already populated"));

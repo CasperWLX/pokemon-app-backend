@@ -36,7 +36,7 @@ public class UserService {
 
     public Mono<Void> saveUserToDB(AuthRequest authRequest) {
         LOGGER.info("Creating new user with name: {}", authRequest.getUsername());
-        return USER_DATABASE.existsByUsernameIgnoreCase(authRequest.getUsername()).flatMap(exists -> {
+        return usernameIsAlreadyTaken(authRequest.getUsername()).flatMap(exists -> {
             if (exists){
                 LOGGER.error("A user with the name: {} already exists", authRequest.getUsername());
                 return Mono.error(new UserAlreadyExistsException(authRequest.getUsername()));
@@ -46,6 +46,10 @@ public class UserService {
                     .doOnSuccess(user -> LOGGER.info("Fetched and saved : {}", user.getUsername()))
                     .then();
         });
+    }
+
+    public Mono<Boolean> usernameIsAlreadyTaken(String username) {
+        return USER_DATABASE.existsByUsernameIgnoreCase(username);
     }
 
     public Mono<CustomUser> convertUserToDBUser(AuthRequest authRequest) {

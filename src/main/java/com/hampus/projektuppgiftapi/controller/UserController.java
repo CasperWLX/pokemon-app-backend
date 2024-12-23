@@ -9,6 +9,7 @@ import com.hampus.projektuppgiftapi.service.UserService;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +37,13 @@ public class UserController {
 
     @PostMapping("/register")
     @Operation(summary = "Register new User", description = "Post a new User to the Database")
-    public Mono<ResponseEntity<Void>> createNewUser(@RequestBody AuthRequest authRequest) {
+    public Mono<ResponseEntity<Void>> createNewUser(@Valid @RequestBody AuthRequest authRequest) {
         return USER_SERVICE.saveUserToDB(authRequest)
                 .then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).build()));
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Logs in a user", description = "Authenticates user and returns access + refresh token if successfully completed")
     public Mono<ResponseEntity<TokenResponse>> login(@RequestBody AuthRequest authRequest) {
         return USER_SERVICE.authenticate(authRequest.getUsername(), authRequest.getPassword())
                 .flatMap(_ -> USER_SERVICE.getUser(authRequest.getUsername())
@@ -87,7 +89,5 @@ public class UserController {
     public Mono<ResponseEntity<CustomUser>> updateUser(@AuthenticationPrincipal String username, @RequestBody UpdateRequest updateRequest) {
         return USER_SERVICE.updateUser(username, updateRequest.getGuessedPokemon()).map(ResponseEntity::ok);
     }
-
-
 }
 

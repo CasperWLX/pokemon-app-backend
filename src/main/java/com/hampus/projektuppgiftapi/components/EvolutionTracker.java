@@ -12,7 +12,6 @@ public class EvolutionTracker {
         this.previousEvolutionStage = 1;
     }
 
-    // Check evolution stage based on the comparison logic
     public int calculateEvolutionStage(PokemonDTO currentPokemon) {
         if (previousPokemonDTO == null) {
             //if no previous Pokémon
