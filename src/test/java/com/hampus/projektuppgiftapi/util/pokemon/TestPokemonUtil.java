@@ -1,6 +1,5 @@
-package com.hampus.projektuppgiftapi.service;
+package com.hampus.projektuppgiftapi.util.pokemon;
 
-import com.hampus.projektuppgiftapi.exceptions.PokemonNotFoundException;
 import com.hampus.projektuppgiftapi.model.pokemon.Pokemon;
 import com.hampus.projektuppgiftapi.model.pokemon.PokemonDTO;
 import com.hampus.projektuppgiftapi.repo.IPokemonRepository;
@@ -18,14 +17,16 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class TestPokemonService {
+public class TestPokemonUtil {
+
     @Mock
     private IPokemonRepository pokemonRepository;
 
     @InjectMocks
-    private PokemonService pokemonService;
+    private PokemonUtil POKEMON_UTIL;
 
     private PokemonDTO pokemonDTO;
 
@@ -47,9 +48,27 @@ public class TestPokemonService {
     }
 
     @Test
+    @DisplayName("Test: If database is empty or populated ")
+    public void testIsDatabasePopulated() {
+        Mockito.when(pokemonRepository.count()).thenReturn(Mono.just(1L));
+        Mono<Boolean> result = POKEMON_UTIL.isDatabaseEmpty();
+
+        StepVerifier.create(result)
+                .consumeNextWith(value -> assertFalse(value, "The result should be false"))
+                .verifyComplete();
+
+        Mockito.when(pokemonRepository.count()).thenReturn(Mono.just(0L));
+        result = POKEMON_UTIL.isDatabaseEmpty();
+
+        StepVerifier.create(result)
+                .consumeNextWith(value -> assertTrue(value, "The result should be true"))
+                .verifyComplete();
+    }
+
+    @Test
     @DisplayName("Test: Successfully convert PokemonDTO to Pokemon model")
     public void testConvertPokemonDTOToPokemonModelSuccessfully() {
-        Pokemon convertedToPokemonModel = pokemonService.convertToPokemonModel(pokemonDTO);
+        Pokemon convertedToPokemonModel = POKEMON_UTIL.convertToPokemonModel(pokemonDTO);
 
         // Assert
         assertNotNull(convertedToPokemonModel, "The result should not be null");
@@ -67,43 +86,13 @@ public class TestPokemonService {
     @DisplayName("Test: Correct boolean is returned based on user input")
     public void testIsInteger() {
 
-        boolean result = pokemonService.isInteger("1");
+        boolean result = POKEMON_UTIL.isInteger("1");
         assertTrue(result, "The result should be true");
 
-        result = pokemonService.isInteger("Pikachu");
+        result = POKEMON_UTIL.isInteger("Pikachu");
         assertFalse(result, "The result should be false");
 
-        result = pokemonService.isInteger("%2e53tsat");
+        result = POKEMON_UTIL.isInteger("%2e53tsat");
         assertFalse(result, "The result should be false");
-    }
-
-    @Test
-    @DisplayName("Test: If database is empty or populated ")
-    public void testIsDatabasePopulated() {
-        Mockito.when(pokemonRepository.count()).thenReturn(Mono.just(1L));
-        Mono<Boolean> result = pokemonService.isDatabaseEmpty();
-
-        StepVerifier.create(result)
-                .consumeNextWith(value -> assertFalse(value, "The result should be false"))
-                .verifyComplete();
-
-        Mockito.when(pokemonRepository.count()).thenReturn(Mono.just(0L));
-        result = pokemonService.isDatabaseEmpty();
-
-        StepVerifier.create(result)
-                .consumeNextWith(value -> assertTrue(value, "The result should be true"))
-                .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("Test: Incorrect fetch of pokemon by ID or Username")
-    public void testFetchPokemonByIdOrUsername() {
-        Mockito.when(pokemonRepository.findByPokemonId(Mockito.any(Integer.class))).thenReturn(Mono.empty());
-        Mono<Pokemon> result = pokemonService.getPokemonById(1);
-        StepVerifier.create(result).expectError(PokemonNotFoundException.class).verify();
-
-        Mockito.when(pokemonRepository.findByName(Mockito.any(String.class))).thenReturn(Mono.empty());
-        result = pokemonService.getPokemonByName("Pokemon");
-        StepVerifier.create(result).expectError(PokemonNotFoundException.class).verify();
     }
 }

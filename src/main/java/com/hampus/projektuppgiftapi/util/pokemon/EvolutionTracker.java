@@ -1,4 +1,4 @@
-package com.hampus.projektuppgiftapi.components;
+package com.hampus.projektuppgiftapi.util.pokemon;
 
 import com.hampus.projektuppgiftapi.model.pokemon.PokemonDTO;
 import org.springframework.stereotype.Component;

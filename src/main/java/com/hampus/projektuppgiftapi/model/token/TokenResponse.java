@@ -1,6 +1,6 @@
 package com.hampus.projektuppgiftapi.model.token;
 
-public class TokenResponse {
+public class TokenResponse implements IRefreshTokens, IAccessTokens {
 
     private String accessToken;
     private String refreshToken;

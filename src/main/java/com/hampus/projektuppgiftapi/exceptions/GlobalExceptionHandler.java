@@ -1,17 +1,18 @@
 package com.hampus.projektuppgiftapi.exceptions;
 
+import com.hampus.projektuppgiftapi.exceptions.pokemon.PokemonCreationException;
+import com.hampus.projektuppgiftapi.exceptions.pokemon.PokemonNotFoundException;
+import com.hampus.projektuppgiftapi.exceptions.pokemon.PokemonUpdateException;
+import com.hampus.projektuppgiftapi.exceptions.user.LogInException;
+import com.hampus.projektuppgiftapi.exceptions.user.UserAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -58,5 +59,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidLogin(LogInException e) {
         logger.error("Invalid credentials for user: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
+    public static class UserNotFoundException extends UsernameNotFoundException {
+        public UserNotFoundException(String message){
+            super(message);
+        }
     }
 }

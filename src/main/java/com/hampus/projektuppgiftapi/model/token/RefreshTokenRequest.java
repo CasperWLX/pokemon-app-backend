@@ -1,6 +1,6 @@
 package com.hampus.projektuppgiftapi.model.token;
 
-public class RefreshTokenRequest {
+public class RefreshTokenRequest implements IRefreshTokens {
 
     private String refreshToken;
 

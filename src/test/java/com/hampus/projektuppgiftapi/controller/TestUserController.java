@@ -2,7 +2,11 @@ package com.hampus.projektuppgiftapi.controller;
 
 import com.hampus.projektuppgiftapi.config.SecurityConfig;
 import com.hampus.projektuppgiftapi.model.user.AuthRequest;
-import com.hampus.projektuppgiftapi.service.UserService;
+import com.hampus.projektuppgiftapi.repo.IUserRepository;
+import com.hampus.projektuppgiftapi.service.user.IUserAuth;
+import com.hampus.projektuppgiftapi.service.user.IUserCreation;
+import com.hampus.projektuppgiftapi.service.user.IUserModification;
+import com.hampus.projektuppgiftapi.service.user.IUserRetrieval;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +21,19 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 public class TestUserController {
 
     @MockBean
-    private UserService userService;
+    private IUserRepository userRepository;
+
+    @MockBean
+    private IUserCreation userCreation;
+
+    @MockBean
+    private IUserModification userModification;
+
+    @MockBean
+    private IUserRetrieval userRetrieval;
+
+    @MockBean
+    private IUserAuth userAuth;
 
     @MockBean
     private JwtUtil jwtUtil;

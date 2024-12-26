@@ -5,7 +5,7 @@ import com.hampus.projektuppgiftapi.model.token.TokenResponse;
 import com.hampus.projektuppgiftapi.model.user.AuthRequest;
 import com.hampus.projektuppgiftapi.model.user.CustomUser;
 import com.hampus.projektuppgiftapi.model.user.UpdateRequest;
-import com.hampus.projektuppgiftapi.service.UserService;
+import com.hampus.projektuppgiftapi.service.user.*;
 import com.hampus.projektuppgiftapi.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,27 +26,33 @@ import reactor.core.publisher.Mono;
 public class UserController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-    private final UserService USER_SERVICE;
+    private final IUserAuth USER_AUTH;
+    private final IUserCreation USER_CREATION;
+    private final IUserModification USER_MODIFICATION;
+    private final IUserRetrieval USER_RETRIEVAL;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public UserController(UserService userService, JwtUtil jwtUtils) {
-        this.USER_SERVICE = userService;
+    public UserController(JwtUtil jwtUtils, IUserAuth auth, IUserCreation creation, IUserModification modification, IUserRetrieval retrieval) {
         this.jwtUtil = jwtUtils;
+        USER_AUTH = auth;
+        USER_CREATION = creation;
+        USER_MODIFICATION = modification;
+        USER_RETRIEVAL = retrieval;
     }
 
     @PostMapping("/register")
     @Operation(summary = "Register new User", description = "Post a new User to the Database")
     public Mono<ResponseEntity<Void>> createNewUser(@Valid @RequestBody AuthRequest authRequest) {
-        return USER_SERVICE.saveUserToDB(authRequest)
+        return USER_CREATION.saveUserToDB(authRequest)
                 .then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).build()));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Logs in a user", description = "Authenticates user and returns access + refresh token if successfully completed")
     public Mono<ResponseEntity<TokenResponse>> login(@RequestBody AuthRequest authRequest) {
-        return USER_SERVICE.authenticate(authRequest.getUsername(), authRequest.getPassword())
-                .flatMap(_ -> USER_SERVICE.getUser(authRequest.getUsername())
+        return USER_AUTH.authenticate(authRequest.getUsername(), authRequest.getPassword())
+                .flatMap(_ -> USER_RETRIEVAL.getUser(authRequest.getUsername())
                                 .flatMap(user -> {
                                     String accessToken = jwtUtil.generateToken(user.getUsername(), user.getRole());
                                     String refreshToken = jwtUtil.generateRefreshToken(user.getUsername(), user.getRole());
@@ -59,14 +65,20 @@ public class UserController {
 
     @DeleteMapping("/delete/{username}")
     @Operation(summary = "Delete a User", description = "Deletes a User by username")
-    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String username) {
-        return USER_SERVICE.deleteUser(username).then(Mono.just(ResponseEntity.status(HttpStatus.NO_CONTENT).build()));
+    public Mono<ResponseEntity<Boolean>> deleteUser(@PathVariable String username) {
+        return USER_MODIFICATION.deleteByName(username).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+    @DeleteMapping("/delete/all")
+    @Operation(summary = "Deletes all users", description = "Deletes all users from the user database")
+    public Mono<ResponseEntity<Boolean>> deleteAllUsers() {
+        return USER_MODIFICATION.deleteAll().then(Mono.just(ResponseEntity.noContent().build()));
     }
 
     @GetMapping("/info")
     @Operation(summary = "Get User info", description = "Fetches all info about a User")
     public Mono<ResponseEntity<CustomUser>> getUserInfo(@AuthenticationPrincipal String username) {
-        return USER_SERVICE.getUser(username).map(ResponseEntity::ok);
+        return USER_RETRIEVAL.getUser(username).map(ResponseEntity::ok);
     }
 
     @PostMapping("/refresh-token")
@@ -87,7 +99,7 @@ public class UserController {
     @PutMapping("/update")
     @Operation(summary = "Updates the user", description = "Updates a user with new information")
     public Mono<ResponseEntity<CustomUser>> updateUser(@AuthenticationPrincipal String username, @RequestBody UpdateRequest updateRequest) {
-        return USER_SERVICE.updateUser(username, updateRequest.getGuessedPokemon()).map(ResponseEntity::ok);
+        return USER_MODIFICATION.updateUser(username, updateRequest.getGuessedPokemon()).map(ResponseEntity::ok);
     }
 }
 

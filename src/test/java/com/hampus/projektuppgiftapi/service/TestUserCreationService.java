@@ -1,10 +1,11 @@
 package com.hampus.projektuppgiftapi.service;
 
-import com.hampus.projektuppgiftapi.exceptions.UserAlreadyExistsException;
+import com.hampus.projektuppgiftapi.exceptions.user.UserAlreadyExistsException;
 import com.hampus.projektuppgiftapi.model.user.AuthRequest;
 import com.hampus.projektuppgiftapi.model.user.CustomUser;
 import com.hampus.projektuppgiftapi.model.user.UserRoles;
 import com.hampus.projektuppgiftapi.repo.IUserRepository;
+import com.hampus.projektuppgiftapi.service.user.UserCreationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,14 +13,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
-public class TestUserService {
+public class TestUserCreationService {
 
     @Mock
     private IUserRepository userRepository;
@@ -28,7 +28,7 @@ public class TestUserService {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private UserService userService;
+    private UserCreationService USER_CREATION;
 
     private AuthRequest authRequest;
 
@@ -43,7 +43,7 @@ public class TestUserService {
     @DisplayName("Test: DTO converter works correctly")
     void testConvertAuthDTOtoCustomUserModel(){
         Mockito.when(passwordEncoder.encode(authRequest.getPassword())).thenReturn("encodedPassword");
-        Mono<CustomUser> result = userService.convertUserToDBUser(authRequest);
+        Mono<CustomUser> result = USER_CREATION.convertUserToDBUser(authRequest);
 
         StepVerifier.create(result)
                 .expectNextMatches(customUser ->
@@ -59,10 +59,10 @@ public class TestUserService {
         Mockito.when(userRepository.existsByUsernameIgnoreCase(authRequest.getUsername()))
                 .thenReturn(Mono.just(true));
 
-        Mono<Boolean> result = userService.usernameIsAlreadyTaken(authRequest.getUsername());
+        Mono<Boolean> result = USER_CREATION.usernameIsAlreadyTaken(authRequest.getUsername());
         StepVerifier.create(result).expectNext(true).verifyComplete();
 
-        Mono<Void> saveUserResult = userService.saveUserToDB(authRequest);
+        Mono<Void> saveUserResult = USER_CREATION.saveUserToDB(authRequest);
         StepVerifier.create(saveUserResult).expectError(UserAlreadyExistsException.class).verify();
     }
 
@@ -79,7 +79,7 @@ public class TestUserService {
         Mockito.when(userRepository.save(Mockito.any(CustomUser.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
-        Mono<Void> result = userService.saveUserToDB(authRequest);
+        Mono<Void> result = USER_CREATION.saveUserToDB(authRequest);
 
         StepVerifier.create(result)
                 .expectComplete()
